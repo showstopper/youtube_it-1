@@ -106,6 +106,9 @@ class YouTubeIt
       # *String*:: The link to watch the URL on YouTubes website.
       attr_reader :player_url
 
+      # *String*:: The link to the Insight CSV records.
+      attr_reader :insight_url
+
       # YouTubeIt::Model::Rating:: Information about the videos rating.
       attr_reader :rating
 
@@ -158,6 +161,14 @@ class YouTubeIt
       #   Boolean: True if the video can be embedded, false if not.
       def embeddable?
         not @noembed
+      end
+
+      # Parse all the insight data.
+      #
+      # === Returns
+      #   Hash: The insight data we could parse
+      def insight
+	YouTubeIt::Parser::InsightParser.new(insight_url)
       end
 
       # Allows you to check whether the video is widescreen (16:9) or not.

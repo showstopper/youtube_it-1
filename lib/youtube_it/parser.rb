@@ -25,6 +25,22 @@ class YouTubeIt
       end
     end
 
+    class InsightParser < FeedParser #:nodoc:
+      def initialize(content)
+#        @content = Zlib::GzipReader.open(content)
+        
+      rescue OpenURI::HTTPError => e
+        raise OpenURI::HTTPError.new(e.io.status[0],e)
+      rescue
+        @content = content
+      end
+
+      # parse all the csv!
+      def parse_content(content)
+	@content
+      end
+    end
+
     class CommentsFeedParser < FeedParser #:nodoc:
       # return array of comments
       def parse_content(content)
@@ -361,6 +377,15 @@ class YouTubeIt
           end
         end
 
+	# parse interesting <link>s
+	insight_url = nil
+	entry.elements.each("link") do |link|
+	  # we actually only care for insight links. the others can be constructed easily.
+	  if (link.attributes["rel"] == "http://gdata.youtube.com/schemas/2007#insight.views")
+	    insight_url = link.attributes["href"]
+	  end
+	end
+
         title = entry.elements["title"].text
         html_content = entry.elements["content"] ? entry.elements["content"].text : nil
 
@@ -475,6 +500,7 @@ class YouTubeIt
           :rating         => rating,
           :view_count     => view_count,
           :favorite_count => favorite_count,
+	  :insight_url	  => insight_url,
           :widescreen     => widescreen,
           :noembed        => noembed,
           :racy           => racy,
